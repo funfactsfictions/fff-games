@@ -82,6 +82,29 @@ main{padding:0 max(16px,env(safe-area-inset-left,0px)) max(24px,env(safe-area-in
 .nc{aspect-ratio:4/5;border:2px solid var(--ink);border-radius:10px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;font-weight:800;font-size:12px;line-height:1.2;background:var(--soft)}
 .nc.lock{background:repeating-linear-gradient(45deg,#e7eef4 0 8px,#dbe5ee 8px 16px);color:#7a8a98;align-items:center;justify-content:center;font:400 30px "Lilita One","Arial Black",Impact,sans-serif}
 .nc .label{font-size:10px;padding:1px 5px;align-self:flex-start}
+.modes{width:min(100%,600px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:#ffffffd9;border:3px solid var(--ink);border-radius:16px;padding:5px}
+.mode{min-height:44px;border:0;border-radius:11px;background:transparent;font:400 17px "Lilita One","Arial Black",Impact,sans-serif;color:var(--ink)}
+.mode[aria-pressed=true]{background:var(--yel);box-shadow:inset 0 0 0 2px var(--ink)}
+.rfbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-weight:900}
+.hearts{font-size:20px;letter-spacing:2px;color:var(--fic)}
+.rfscore{font:400 22px "Lilita One","Arial Black",Impact,sans-serif}
+.claim{margin:14px 0 6px;font-size:clamp(20px,5vw,24px);line-height:1.6;font-weight:800}
+.chunk{display:inline;font:inherit;line-height:inherit;color:var(--ink);background:var(--soft);border:2px solid #b9c7d3;border-radius:8px;padding:2px 6px;margin:0 2px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.chunk:hover:not(:disabled){border-color:var(--ink)}
+.chunk.hit{background:var(--fic);border-color:var(--ink);color:#fff}
+.chunk.miss{background:#e7ecf0;border-color:#e7ecf0;color:#6b7a88;text-decoration:line-through}
+.chunk.reveal{border:2px dashed var(--fic)}
+.chunk:disabled{cursor:default}
+.found{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:28px}
+.flag{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 10px 2px 6px;font-weight:900;font-size:13px}
+.flag i{width:14px;height:14px;background:var(--fic);clip-path:polygon(0 0,100% 25%,0 50%);display:inline-block;border-left:2px solid var(--ink)}
+.lesson{margin-top:12px;background:var(--yel);border:3px solid var(--ink);border-radius:14px;padding:10px 14px;display:none}
+.lesson.on{display:block;animation:up .3s ease-out}
+.lesson b{font-family:"Lilita One","Arial Black",Impact,sans-serif;font-weight:400;font-size:18px}
+.lesson ul{margin:6px 0 0;padding-left:18px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px;margin-top:12px;text-align:left}
+.legend div{background:var(--soft);border:2px solid var(--ink);border-radius:12px;padding:8px 10px;font-size:14px}
+.legend b{display:block}
 .cta{width:min(100%,600px);display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;font-weight:800;color:var(--ink);background:#ffffffd9;border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:15px}
 .cta a{color:var(--deep);font-weight:900}
 footer{font-size:13px;font-weight:700;color:var(--ink);text-align:center}
@@ -144,6 +167,7 @@ main{justify-content:center;overflow-y:auto;padding:36px 32px}
   </aside>
   <main>
     <div class="welcome" id="welcome"></div>
+    <div class="modes" role="group" aria-label="Game mode"><button class="mode" id="mDaily" aria-pressed="true">Daily questions</button><button class="mode" id="mFlag" aria-pressed="false">Red Flag Hunt</button></div>
     <div class="dots" id="dots" aria-label="Rounds"></div>
     <section class="card" id="card" aria-live="polite"></section>
     <div class="cta"><span>New questions every midnight.</span><a href="https://www.youtube.com/@FunFactsFictions/shorts" target="_blank" rel="noopener">Watch Fun Fact's Fictions</a></div>
@@ -243,10 +267,11 @@ function results(res,mode){
  <p class="small">${liveStreak()}-day streak · ${S.cards.length} of ${BANK.length} fact cards found</p>
  <p class="small" id="countdown"></p>
  <div class="row"><button class="btn yel" id="share">Share score</button><button class="btn white" id="more">Bonus round</button></div>
+ <button class="btn" id="goFlag">Play Red Flag Hunt</button>
  <div class="toast" id="toast"></div></div>
  <div class="nb"><h3>Professor's notebook</h3><p class="small">Find the real answer to unlock its fact card.</p>
  <div class="nbgrid">${BANK.map(q=>owned.has(q.id)?`<div class="nc"><span class="label l-${q.c}">${CATS[q.c]}</span><span>${esc(q.q)}</span></div>`:`<div class="nc lock" aria-label="Locked card">?</div>`).join("")}</div></div>`;
- $("share").addEventListener("click",share);$("more").addEventListener("click",()=>start("extra"));tick();
+ $("share").addEventListener("click",share);$("more").addEventListener("click",()=>start("extra"));$("goFlag").addEventListener("click",()=>setMode("flag"));tick();
 }
 async function share(){trackLater("rof-share");
  const r=(S.done&&S.done.day===dayNo?S.done.res:G.res);
@@ -259,8 +284,110 @@ function tick(){const el=$("countdown");if(!el)return;const t=new Date(),m=new D
 setInterval(tick,1000);
 const src={"from-yt":"YouTube","from-ig":"Instagram","from-fb":"Facebook","from-tt":"TikTok"}[location.hash.slice(1)];
 if(src){trackLater("rof-from-"+src.toLowerCase());$("welcome").textContent=`Welcome from ${src}! Find the real answer among the Professor's fictions.`;$("welcome").classList.add("on")}
+/* ---------- Mini-game: Red Flag Hunt ---------- */
+const FLAGS={
+ bait:["Emotional bait","Tries to make you angry, scared or rushed so you stop thinking."],
+ miracle:["Miracle promise","Huge results, tiny effort. Real effects are usually small and slow."],
+ vague:["Vague source","'Scientists say', 'a study found', 'experts agree'... which ones? Where?"],
+ absolute:["Absolute words","'Always', 'never', '100%', 'everyone'. Nature almost never works that way."],
+ precise:["Fake precision","Oddly exact numbers make a claim feel scientific without proving anything."],
+ cause:["Cause confusion","Two things happening together doesn't mean one causes the other."],
+ myth:["Old myth","A 'fact' everyone repeats that was busted long ago."],
+ anecdote:["One story","One person's experience is not evidence that it works for everyone."]
+};
+const CLAIMS=[
+ {p:[["Doctors HATE this:","bait"],"one spoon of honey",["cures every cold overnight.","miracle"]]},
+ {p:[["Scientists say","vague"],"coffee drinkers",["always","absolute"],"live",["exactly 11.4 years","precise"],"longer."]},
+ {p:["Ice cream sales and shark attacks both rise in summer,",["so ice cream causes shark attacks.","cause"]]},
+ {p:[["Everyone knows","absolute"],["you only use 10% of your brain.","myth"]]},
+ {p:[["A study found","vague"],"this app makes you",["300% smarter in just 3 days.","miracle"]]},
+ {p:["Goldfish",["never","absolute"],"remember anything longer than",["3 seconds,","myth"],["experts agree.","vague"]]},
+ {p:[["Share this before it gets deleted!","bait"],"Bananas will go extinct",["next Tuesday at 9:41.","precise"]]},
+ {p:["Kids who eat breakfast get better grades,",["so breakfast turns you into a genius.","cause"]]},
+ {p:[["My uncle tried it once,","anecdote"],"so this diet",["definitely works for everyone.","absolute"]]},
+ {p:["Cracking your knuckles",["100%","absolute"],"gives you arthritis,",["a viral video proves it.","vague"]]},
+ {p:["Swallowed gum stays in your stomach",["for exactly 7 years.","myth"]]},
+ {p:["This lucky bracelet",["guarantees you'll win","miracle"],"every game,",["my friend wore it once and won.","anecdote"]]},
+ {p:["People who sleep with socks on are happier,",["so socks cure sadness.","cause"]]},
+ {p:[["You won't believe this shocking secret:","bait"],"crows can recognise human faces."]},
+ {p:["Bulls",["hate the colour red,","myth"],["every farmer knows that.","absolute"]]},
+ {p:[["Experts confirm","vague"],"that",["99.7% of people","precise"],"yawn when they read about yawning."]}
+];
+let RF=null;
+function setMode(m){
+ $("mDaily").setAttribute("aria-pressed",m==="daily");$("mFlag").setAttribute("aria-pressed",m==="flag");
+ $("dots").style.display=m==="flag"?"none":"";
+ if(m==="flag"){rfIntro();return}
+ if(G&&G.i<5)ask();else if(S.done&&S.done.day===dayNo)results(S.done.res,"daily");else start("daily");
+}
+function rfIntro(){
+ const best=S.rfBest||0;
+ $("card").innerHTML=`<span class="label l-mind">Mini-game</span>
+ <h2 class="q">Red Flag Hunt</h2>
+ <p class="hint">Fake facts leave clues. Tap every suspicious part of each claim. Wrong taps cost a heart. 8 claims, 3 hearts.</p>
+ <div class="legend">${Object.values(FLAGS).map(f=>`<div><b>${esc(f[0])}</b>${esc(f[1])}</div>`).join("")}</div>
+ <button class="btn yel" id="rfGo">Start hunting</button>
+ <p class="small" style="text-align:center">${best?`Your best: ${best} points`:"Train your fiction detector like the Professor."}</p>`;
+ $("rfGo").addEventListener("click",rfStart);
+}
+function rfStart(){
+ trackLater("rof-redflag-start");
+ const pick=shuf(CLAIMS,Date.now()%100000).slice(0,8);
+ RF={claims:pick,i:0,hearts:3,score:0,combo:0,found:0,total:0,missed:0};
+ rfAsk();
+}
+function rfAsk(){
+ const c=RF.claims[RF.i];RF.left=c.p.filter(x=>Array.isArray(x)).length;RF.total+=RF.left;RF.cur=[];
+ $("card").innerHTML=`<div class="rfbar"><span class="label l-mind">Claim ${RF.i+1}/8</span><span class="hearts" aria-label="${RF.hearts} hearts left">${"♥".repeat(RF.hearts)}<span style="color:#c9d3dc">${"♥".repeat(3-RF.hearts)}</span></span><span class="rfscore">${RF.score}</span></div>
+ <p class="claim">${c.p.map((x,k)=>`<button class="chunk" data-k="${k}">${esc(Array.isArray(x)?x[0]:x)}</button>`).join(" ")}</p>
+ <p class="hint">Tap the red flags. ${RF.left} hiding in this one.</p>
+ <div class="found" id="found"></div><div class="lesson" id="lesson"></div>`;
+ $("card").querySelectorAll(".chunk").forEach(b=>b.addEventListener("click",()=>rfTap(b,+b.dataset.k)));
+}
+function rfTap(b,k){
+ const x=RF.claims[RF.i].p[k];b.disabled=true;
+ if(Array.isArray(x)){
+  RF.combo++;const pts=100+Math.min(RF.combo-1,5)*20;RF.score+=pts;RF.found++;RF.left--;RF.cur.push(x[1]);
+  b.classList.add("hit");$("found").insertAdjacentHTML("beforeend",`<span class="flag"><i></i>${esc(FLAGS[x[1]][0])} +${pts}</span>`);
+  $("card").querySelector(".rfscore").textContent=RF.score;
+  if(RF.left===0)rfDone(true);
+ }else{
+  RF.combo=0;RF.hearts--;b.classList.add("miss");
+  $("card").querySelector(".hearts").innerHTML=`${"♥".repeat(RF.hearts)}<span style="color:#c9d3dc">${"♥".repeat(3-RF.hearts)}</span>`;
+  if(RF.hearts<=0)rfDone(false);
+ }
+}
+function rfDone(clean){
+ const c=RF.claims[RF.i];
+ $("card").querySelectorAll(".chunk").forEach((b,k)=>{b.disabled=true;const x=c.p[k];if(Array.isArray(x)&&!b.classList.contains("hit")){b.classList.add("reveal");RF.missed++}});
+ const types=[...new Set(c.p.filter(x=>Array.isArray(x)).map(x=>x[1]))];
+ const last=RF.i===RF.claims.length-1||RF.hearts<=0;
+ const l=$("lesson");
+ l.innerHTML=`<b>${clean?"All flags spotted!":"Out of hearts!"}</b><ul>${types.map(t=>`<li><strong>${esc(FLAGS[t][0])}:</strong> ${esc(FLAGS[t][1])}</li>`).join("")}</ul>
+ <button class="btn" id="rfNext">${last?"See my score":"Next claim"}</button>`;
+ l.classList.add("on");
+ $("rfNext").addEventListener("click",()=>{if(last)rfEnd();else{RF.i++;rfAsk()}});
+ $("rfNext").focus({preventScroll:true});
+}
+function rfEnd(){
+ const acc=RF.total?Math.round(RF.found/RF.total*100):0;
+ const rank=acc>=95?"Master Myth-Buster":acc>=80?"Fiction Detective":acc>=60?"Sharp Skeptic":acc>=40?"Curious Rookie":"Easily Fooled";
+ S.rfBest=Math.max(S.rfBest||0,RF.score);store.set(S);trackLater("rof-redflag-finish");
+ $("card").innerHTML=`<div class="score"><span class="label l-mind">Red Flag Hunt</span>
+ <div class="big">${RF.score}</div><div class="verdict">${rank}</div>
+ <p class="small">${RF.found} of ${RF.total} red flags spotted (${acc}%) · best ${S.rfBest}</p>
+ <div class="row"><button class="btn yel" id="rfShare">Share score</button><button class="btn white" id="rfAgain">Play again</button></div>
+ <div class="toast" id="toast"></div></div>`;
+ $("rfAgain").addEventListener("click",rfStart);
+ $("rfShare").addEventListener("click",async()=>{trackLater("rof-redflag-share");const text=`Red Flag Hunt: ${RF.score} points, ${acc}% of fake-fact clues spotted. Rank: ${rank}\n${SHARE_URL}`;
+  try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(text);$("toast").textContent="Copied! Paste it in the comments."}catch(e){$("toast").textContent="Copy this: "+text}});
+}
+$("mDaily").addEventListener("click",()=>setMode("daily"));
+$("mFlag").addEventListener("click",()=>setMode("flag"));
 window.claude?.hot?.snapshot?.(()=>S);
 if(S.done&&S.done.day===dayNo){hud();results(S.done.res,"daily")}else start("daily");
+if(location.hash==="#redflag")setMode("flag");
 }
 </script>
 </body>
