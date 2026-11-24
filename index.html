@@ -105,6 +105,35 @@ main{padding:0 max(16px,env(safe-area-inset-left,0px)) max(24px,env(safe-area-in
 .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px;margin-top:12px;text-align:left}
 .legend div{background:var(--soft);border:2px solid var(--ink);border-radius:12px;padding:8px 10px;font-size:14px}
 .legend b{display:block}
+.modes{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mode{font-size:clamp(14px,3.8vw,17px);padding:0 4px;line-height:1.1}
+.fmenu{display:grid;gap:10px;margin-top:12px}
+.fpick{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;border:3px solid var(--ink);border-radius:14px;background:var(--soft);padding:12px 14px;box-shadow:0 4px 0 var(--ink);color:var(--ink)}
+.fpick:hover{transform:translateY(-2px)}
+.fpick b{display:block;font:400 20px "Lilita One","Arial Black",Impact,sans-serif;font-weight:400}
+.fpick span{font-size:14px;font-weight:700;color:var(--muted)}
+.fpick em{font-style:normal;font-weight:900;font-size:13px;white-space:nowrap;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 8px}
+.ficon{width:46px;height:46px;border-radius:12px;border:2px solid var(--ink);display:grid;place-items:center;font:400 22px "Lilita One","Arial Black",Impact,sans-serif}
+.note{font-size:13px;font-weight:700;color:var(--muted);margin:12px 0 0}
+.stroop{display:grid;place-items:center;min-height:150px;margin:12px 0;border:3px solid var(--ink);border-radius:16px;background:#fff}
+.sword{font:400 clamp(44px,13vw,72px)/1 "Lilita One","Arial Black",Impact,sans-serif;letter-spacing:.02em}
+.sbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sbtn{min-height:58px;border:3px solid var(--ink);border-radius:14px;color:#fff;font:400 20px "Lilita One","Arial Black",Impact,sans-serif;box-shadow:0 4px 0 var(--ink);-webkit-text-stroke:1px var(--ink);paint-order:stroke fill}
+.sbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.fbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-weight:900}
+.fbar .t{font:400 22px "Lilita One","Arial Black",Impact,sans-serif;font-variant-numeric:tabular-nums}
+.flash{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.grid25{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:12px}
+.cell{aspect-ratio:1;border:3px solid var(--ink);border-radius:10px;background:#fff;font:400 clamp(20px,6vw,28px) "Lilita One","Arial Black",Impact,sans-serif;color:var(--ink);padding:0}
+.cell.done{background:var(--fact);color:#fff;border-color:var(--fact)}
+.cell.bad{background:var(--fic);color:#fff}
+.arena{position:relative;margin-top:12px;border:3px solid var(--ink);border-radius:16px;overflow:hidden;background:#8fa1b0;height:300px}
+.arena canvas{position:absolute;inset:0;width:100%;height:100%}
+.counter{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0}
+.counter button{width:52px;height:52px;border:3px solid var(--ink);border-radius:50%;background:var(--yel);font:400 28px "Lilita One","Arial Black",Impact,sans-serif;box-shadow:0 3px 0 var(--ink)}
+.counter output{font:400 48px "Lilita One","Arial Black",Impact,sans-serif;min-width:2ch;text-align:center}
+.choices{display:grid;gap:8px;margin-top:10px}
 .cta{width:min(100%,600px);display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;font-weight:800;color:var(--ink);background:#ffffffd9;border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:15px}
 .cta a{color:var(--deep);font-weight:900}
 footer{font-size:13px;font-weight:700;color:var(--ink);text-align:center}
@@ -167,7 +196,7 @@ main{justify-content:center;overflow-y:auto;padding:36px 32px}
   </aside>
   <main>
     <div class="welcome" id="welcome"></div>
-    <div class="modes" role="group" aria-label="Game mode"><button class="mode" id="mDaily" aria-pressed="true">Daily questions</button><button class="mode" id="mFlag" aria-pressed="false">Red Flag Hunt</button></div>
+    <div class="modes" role="group" aria-label="Game mode"><button class="mode" id="mDaily" aria-pressed="true">Daily quiz</button><button class="mode" id="mFlag" aria-pressed="false">Red Flag Hunt</button><button class="mode" id="mFocus" aria-pressed="false">Focus Lab</button></div>
     <div class="dots" id="dots" aria-label="Rounds"></div>
     <section class="card" id="card" aria-live="polite"></section>
     <div class="cta"><span>New questions every midnight.</span><a href="https://www.youtube.com/@FunFactsFictions/shorts" target="_blank" rel="noopener">Watch Fun Fact's Fictions</a></div>
@@ -315,9 +344,11 @@ const CLAIMS=[
 ];
 let RF=null;
 function setMode(m){
- $("mDaily").setAttribute("aria-pressed",m==="daily");$("mFlag").setAttribute("aria-pressed",m==="flag");
- $("dots").style.display=m==="flag"?"none":"";
+ stopArena();
+ $("mDaily").setAttribute("aria-pressed",m==="daily");$("mFlag").setAttribute("aria-pressed",m==="flag");$("mFocus").setAttribute("aria-pressed",m==="focus");
+ $("dots").style.display=m==="daily"?"":"none";
  if(m==="flag"){rfIntro();return}
+ if(m==="focus"){focusMenu();return}
  if(G&&G.i<5)ask();else if(S.done&&S.done.day===dayNo)results(S.done.res,"daily");else start("daily");
 }
 function rfIntro(){
@@ -383,11 +414,159 @@ function rfEnd(){
   try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==="AbortError")return}
   try{await navigator.clipboard.writeText(text);$("toast").textContent="Copied! Paste it in the comments."}catch(e){$("toast").textContent="Copy this: "+text}});
 }
+/* ---------- Focus Lab ---------- */
+const COLS=[["RED","#e8343a"],["BLUE","#1e88e5"],["GREEN","#1f9d45"],["YELLOW","#e6a800"]];
+let ST=null,NH=null,DN=null,ARENA=0;
+function stopArena(){if(ARENA){cancelAnimationFrame(ARENA);ARENA=0}if(NH&&NH.timer){clearInterval(NH.timer);NH.timer=0}}
+function fmt(ms){return (ms/1000).toFixed(1)+"s"}
+function focusMenu(){
+ stopArena();const b=S.focus||{};
+ $("card").innerHTML=`<span class="label l-mind">Focus Lab</span>
+ <h2 class="q">How sharp is your focus?</h2>
+ <p class="hint">Three quick tests from real psychology experiments. Pick one.</p>
+ <div class="fmenu">
+  <button class="fpick" id="fStroop"><span class="ficon" style="background:#ffd6e0">Aa</span><span><b>Color Clash</b><span>Tap the colour of the ink, not the word. 20 rounds.</span></span><em>${b.stroop?b.stroop+" ms":"New"}</em></button>
+  <button class="fpick" id="fHunt"><span class="ficon" style="background:#dff6e6">25</span><span><b>Number Hunt</b><span>Tap 1 to 25 in order as fast as you can.</span></span><em>${b.hunt?fmt(b.hunt):"New"}</em></button>
+  <button class="fpick" id="fNotice"><span class="ficon" style="background:#e3ecff">?</span><span><b>Did You Notice?</b><span>Count the bounces. Stay focused. 20 seconds.</span></span><em>${b.notice?"Done":"New"}</em></button>
+ </div>
+ <p class="note">Honest note from the Professor: practice makes you better at these games, but science hasn't shown that games like these boost focus in everyday life. Play them to test yourself and learn how your brain works.</p>`;
+ $("fStroop").addEventListener("click",stroopIntro);$("fHunt").addEventListener("click",huntStart);$("fNotice").addEventListener("click",noticeIntro);
+}
+function backBtn(){return `<button class="btn white" id="fBack">More tests</button>`}
+function bindBack(){const b=$("fBack");if(b)b.addEventListener("click",focusMenu)}
+/* Color Clash */
+function stroopIntro(){
+ $("card").innerHTML=`<span class="label l-mind">Color Clash</span><h2 class="q">Ink, not word!</h2>
+ <p class="hint">You'll see a colour word. Tap the colour it is <u>printed in</u>. Be fast and accurate.</p>
+ <div class="stroop"><span class="sword" style="color:${COLS[1][1]}">RED</span></div>
+ <p class="small" style="text-align:center">Here the right answer is BLUE.</p>
+ <button class="btn yel" id="sGo">Start</button>${backBtn()}`;
+ $("sGo").addEventListener("click",stroopStart);bindBack();
+}
+function stroopStart(){
+ trackLater("rof-focus-stroop-start");
+ const r=rng(Date.now()%100000),trials=[];
+ for(let i=0;i<20;i++){const w=Math.floor(r()*4);let c=w;if(r()>0.35){c=(w+1+Math.floor(r()*3))%4}trials.push({w,c})}
+ ST={trials,i:0,res:[]};stroopShow();
+}
+function stroopShow(){
+ const t=ST.trials[ST.i];
+ $("card").innerHTML=`<div class="fbar"><span class="label l-mind">Color Clash ${ST.i+1}/20</span><span class="t">${ST.res.filter(x=>x.ok).length} ✓</span></div>
+ <div class="stroop" id="sbox"><span class="sword" style="color:${COLS[t.c][1]}">${COLS[t.w][0]}</span></div>
+ <div class="sbtns">${COLS.map((c,i)=>`<button class="sbtn" data-i="${i}" style="background:${c[1]}">${c[0]}</button>`).join("")}</div>`;
+ ST.t0=performance.now();ST.lock=false;
+ $("card").querySelectorAll(".sbtn").forEach(b=>b.addEventListener("click",()=>stroopTap(+b.dataset.i)));
+}
+function stroopTap(i){
+ if(ST.lock||ST.i>=20)return;ST.lock=true;
+ const t=ST.trials[ST.i],ms=performance.now()-ST.t0,ok=i===t.c;
+ ST.res.push({ok,ms,match:t.w===t.c});
+ if(!ok){$("sbox").classList.remove("flash");void $("sbox").offsetWidth;$("sbox").classList.add("flash")}
+ ST.i++;
+ if(ST.i<20)setTimeout(stroopShow,ok?120:350);else setTimeout(stroopEnd,300);
+}
+function stroopEnd(){
+ const okR=ST.res.filter(x=>x.ok),avg=a=>a.length?Math.round(a.reduce((s,x)=>s+x.ms,0)/a.length):0;
+ const all=avg(okR),m=avg(okR.filter(x=>x.match)),mm=avg(okR.filter(x=>!x.match)),acc=Math.round(okR.length/20*100);
+ S.focus=S.focus||{};if(acc>=80&&(!S.focus.stroop||all<S.focus.stroop))S.focus.stroop=all;store.set(S);trackLater("rof-focus-stroop-finish");
+ const cost=m&&mm?mm-m:0;
+ $("card").innerHTML=`<div class="score"><span class="label l-mind">Color Clash</span><div class="big">${all} ms</div>
+ <div class="verdict">${acc}% correct</div>
+ <p class="small">Matching words: ${m||"–"} ms · clashing words: ${mm||"–"} ms${cost>0?` · your brain lost <b>${cost} ms</b> per clash`:""}</p></div>
+ <div class="answer on"><h3>Real answer<small>The Stroop effect</small></h3><p>Reading is so automatic that your brain reads the word before you can stop it. When the word and the ink disagree, it has to block the word first, and that costs time. Psychologist J. Ridley Stroop described it in 1935.</p></div>
+ <div class="row"><button class="btn yel" id="sAgain">Try again</button>${backBtn()}</div>`;
+ $("sAgain").addEventListener("click",stroopStart);bindBack();
+}
+/* Number Hunt */
+function huntStart(){
+ trackLater("rof-focus-hunt-start");stopArena();
+ const nums=shuf([...Array(25)].map((_,i)=>i+1),Date.now()%100000);
+ NH={next:1,t0:0,errors:0};
+ $("card").innerHTML=`<div class="fbar"><span class="label l-mind">Number Hunt</span><span>Find <b id="hNext">1</b></span><span class="t" id="hTime">0.0s</span></div>
+ <div class="grid25">${nums.map(n=>`<button class="cell" data-n="${n}">${n}</button>`).join("")}</div>
+ <p class="small" style="text-align:center">The clock starts on your first tap. Keep your eyes near the centre.</p>${backBtn()}`;
+ $("card").querySelectorAll(".cell").forEach(b=>b.addEventListener("click",()=>huntTap(b,+b.dataset.n)));bindBack();
+}
+function huntTap(b,n){
+ if(!NH.t0){NH.t0=performance.now();NH.timer=setInterval(()=>{const el=$("hTime");if(el)el.textContent=fmt(performance.now()-NH.t0)},100)}
+ if(n===NH.next){b.classList.add("done");b.disabled=true;NH.next++;$("hNext").textContent=Math.min(NH.next,25);if(NH.next>25)huntEnd()}
+ else{NH.errors++;b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),250)}
+}
+function huntEnd(){
+ const ms=performance.now()-NH.t0;clearInterval(NH.timer);NH.timer=0;
+ S.focus=S.focus||{};const prev=S.focus.hunt;if(!prev||ms<prev)S.focus.hunt=Math.round(ms);store.set(S);trackLater("rof-focus-hunt-finish");
+ const v=ms<20000?"Laser focus":ms<30000?"Sharp eyes":ms<45000?"Warming up":"Keep hunting";
+ $("card").innerHTML=`<div class="score"><span class="label l-mind">Number Hunt</span><div class="big">${fmt(ms)}</div>
+ <div class="verdict">${v}</div><p class="small">${NH.errors} wrong taps · best ${fmt(S.focus.hunt)}${prev&&ms<prev?" · new record!":""}</p></div>
+ <div class="answer on"><h3>Real answer<small>Schulte tables</small></h3><p>This grid is called a Schulte table. It tests visual search: how fast your eyes find a target among distractors. Most people speed up a lot after a few tries, because your brain learns where to look and stops re-checking numbers it has already seen.</p></div>
+ <div class="row"><button class="btn yel" id="hAgain">Play again</button>${backBtn()}</div>`;
+ $("hAgain").addEventListener("click",huntStart);bindBack();
+}
+/* Did You Notice? */
+function noticeIntro(){
+ $("card").innerHTML=`<span class="label l-mind">Did You Notice?</span><h2 class="q">Count the white bounces</h2>
+ <p class="hint">Two white and three black balls will bounce around for 20 seconds. Count how many times the <b>white</b> balls hit a wall. Ignore the black ones. Concentrate!</p>
+ <button class="btn yel" id="nGo">I'm ready</button>${backBtn()}`;
+ $("nGo").addEventListener("click",noticeStart);bindBack();
+}
+function noticeStart(){
+ trackLater("rof-focus-notice-start");
+ $("card").innerHTML=`<div class="fbar"><span class="label l-mind">Count the white bounces</span><span class="t" id="nTime">20</span></div><div class="arena" id="arena"><canvas id="cv"></canvas></div>`;
+ const cv=$("cv"),box=$("arena"),dpr=Math.min(window.devicePixelRatio||1,2);
+ const W=box.clientWidth,H=box.clientHeight;cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext("2d");g.scale(dpr,dpr);
+ const r=rng(Date.now()%100000),R=Math.max(10,Math.min(16,W/30)),sp=Math.max(55,W/6.5);
+ const balls=[...Array(5)].map((_,i)=>{const a=r()*Math.PI*2;return{x:R+r()*(W-2*R),y:R+r()*(H-2*R),vx:Math.cos(a)*sp*(0.8+r()*0.4),vy:Math.sin(a)*sp*(0.8+r()*0.4),white:i<2}});
+ DN={hits:0,t0:performance.now(),last:performance.now()};
+ const DUR=20000,SQ0=8000,SQ1=14000,sq=Math.max(28,W/14);
+ const frame=now=>{
+  const dt=Math.min(.05,(now-DN.last)/1000);DN.last=now;const el=now-DN.t0;
+  for(const b of balls){b.x+=b.vx*dt;b.y+=b.vy*dt;let hit=false;
+   if(b.x<R){b.x=R;b.vx=Math.abs(b.vx);hit=true}if(b.x>W-R){b.x=W-R;b.vx=-Math.abs(b.vx);hit=true}
+   if(b.y<R){b.y=R;b.vy=Math.abs(b.vy);hit=true}if(b.y>H-R){b.y=H-R;b.vy=-Math.abs(b.vy);hit=true}
+   if(hit&&b.white)DN.hits++}
+  g.fillStyle="#8fa1b0";g.fillRect(0,0,W,H);
+  if(el>SQ0&&el<SQ1){const p=(el-SQ0)/(SQ1-SQ0);g.fillStyle="#e8343a";g.fillRect(-sq+p*(W+sq),H/2-sq/2,sq,sq)}
+  for(const b of balls){g.beginPath();g.arc(b.x,b.y,R,0,Math.PI*2);g.fillStyle=b.white?"#ffffff":"#141414";g.fill()}
+  const t=$("nTime");if(t)t.textContent=Math.max(0,Math.ceil((DUR-el)/1000));
+  if(el<DUR)ARENA=requestAnimationFrame(frame);else{ARENA=0;noticeAsk()}
+ };
+ ARENA=requestAnimationFrame(frame);
+}
+function noticeAsk(){
+ let guess=0;
+ $("card").innerHTML=`<span class="label l-mind">Did You Notice?</span><h2 class="q">How many white bounces?</h2>
+ <div class="counter"><button id="nMinus" aria-label="Minus one">−</button><output id="nVal">0</output><button id="nPlus" aria-label="Plus one">+</button></div>
+ <button class="btn yel" id="nNext">That's my count</button>`;
+ $("nMinus").addEventListener("click",()=>{guess=Math.max(0,guess-1);$("nVal").textContent=guess});
+ $("nPlus").addEventListener("click",()=>{guess++;$("nVal").textContent=guess});
+ $("nNext").addEventListener("click",()=>{
+  $("card").innerHTML=`<span class="label l-mind">Did You Notice?</span><h2 class="q">One more question…</h2>
+  <p class="hint">While you were counting, did anything else cross the screen?</p>
+  <div class="choices"><button class="opt" data-a="no"><span class="k">A</span><span>No, just the balls</span></button><button class="opt" data-a="blue"><span class="k">B</span><span>A blue circle</span></button><button class="opt" data-a="red"><span class="k">C</span><span>A red square</span></button><button class="opt" data-a="green"><span class="k">D</span><span>A green triangle</span></button></div>`;
+  $("card").querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>noticeEnd(guess,b.dataset.a)));
+ });
+}
+function noticeEnd(guess,ans){
+ const saw=ans==="red",diff=Math.abs(guess-DN.hits);
+ S.focus=S.focus||{};S.focus.notice=1;store.set(S);trackLater(saw?"rof-focus-notice-saw":"rof-focus-notice-missed");
+ $("card").innerHTML=`<div class="score"><span class="label l-mind">Did You Notice?</span>
+ <div class="big" style="font-size:clamp(40px,11vw,64px)">${saw?"You saw it!":"You missed it!"}</div>
+ <div class="verdict">A red square crossed the middle for 6 seconds</div>
+ <p class="small">White bounces: ${DN.hits} · your count: ${guess} ${diff===0?"(perfect!)":diff<=2?"(very close)":""}</p></div>
+ <div class="answer on"><h3>Real answer<small>Inattentional blindness</small></h3><p>When you focus hard on one task, your brain filters out things it thinks don't matter, even big, bright ones. In the famous 1999 "invisible gorilla" experiment by Daniel Simons and Christopher Chabris, about half the viewers counting basketball passes never noticed a person in a gorilla suit walking through the scene.</p></div>
+ <div class="row"><button class="btn yel" id="nShare">Share</button>${backBtn()}</div><div class="toast" id="toast"></div>`;
+ bindBack();
+ $("nShare").addEventListener("click",async()=>{trackLater("rof-focus-notice-share");const text=`${saw?"I spotted":"I totally missed"} the hidden thing in the Professor's focus test. Can you see it?\n${SHARE_URL}#focus`;
+  try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(text);$("toast").textContent="Copied! Don't spoil it in the comments 😉"}catch(e){$("toast").textContent="Copy this: "+text}});
+}
+$("mFocus").addEventListener("click",()=>setMode("focus"));
 $("mDaily").addEventListener("click",()=>setMode("daily"));
 $("mFlag").addEventListener("click",()=>setMode("flag"));
 window.claude?.hot?.snapshot?.(()=>S);
 if(S.done&&S.done.day===dayNo){hud();results(S.done.res,"daily")}else start("daily");
 if(location.hash==="#redflag")setMode("flag");
+if(location.hash==="#focus")setMode("focus");
 }
 </script>
 </body>
