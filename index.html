@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real or Fiction</title>
+<meta name="description" content="Strange questions. Real answers. Find the real answer among the Professor's fictions. From Fun Fact's Fictions.">
+<meta property="og:title" content="Real or Fiction? by Fun Fact's Fictions">
+<meta property="og:description" content="5 strange questions a day. One real answer, two fictions. Can you beat the Professor?">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* VOICE occasion: a bright, cheeky science-show game, quick and loud like the channel's thumbnails
+   IDEA a Fun Fact's Fictions Short thumbnail you can play: outlined headline, cartoon host, colour pill label, rubber-stamp verdict
+   PICTURE the Professor on a sky-blue sunburst with the yellow FFF ribbon; the question card is the game
+   COLOUR one fixed daytime palette: sky blue sunburst, ribbon yellow, white cards, ink black, fact green, fiction red
+   TYPE Lilita One for headlines with black outline, Nunito for reading
+   LAYOUT laptop: Professor panel with stats left, card right; phone: slim sunburst band with ribbon and Professor, then the card */
+:root{color-scheme:light;--sky:#29b6f6;--sky2:#7fd8ff;--deep:#0d6fb8;--yel:#ffd21f;--yel2:#f2a900;--ink:#141414;--card:#fff;--fact:#22b14c;--fic:#e8343a;--soft:#eef8ff;--muted:#4a5a68}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--deep);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--yel);outline-offset:3px}
+.app{min-height:100%;display:grid;grid-template-columns:minmax(0,1fr);background:repeating-conic-gradient(from 0deg at 50% 0%,var(--sky) 0 7deg,var(--sky2) 7deg 14deg);background-attachment:fixed}
+.side{position:relative;padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px}
+.ribbon{display:inline-block;position:relative;background:var(--yel);border:3px solid var(--ink);padding:2px 16px;font:400 22px/1.2 "Lilita One","Arial Black",Impact,sans-serif;box-shadow:0 4px 0 var(--ink)}
+.ribbon::before,.ribbon::after{content:"";position:absolute;top:8px;width:14px;height:100%;background:var(--yel2);border:3px solid var(--ink);z-index:-1}
+.ribbon::before{left:-12px}.ribbon::after{right:-12px}
+h1{margin:10px 0 2px;font:400 clamp(32px,8vw,56px)/1 "Lilita One","Arial Black",Impact,sans-serif;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink);letter-spacing:.01em}
+.tagline{font-weight:900;color:var(--ink);font-size:15px;margin:6px 0 0}
+.prof{width:clamp(110px,30vw,170px);align-self:end}
+.prof svg{display:block;width:100%;height:auto}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pill{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 10px;font-weight:900;font-size:14px;white-space:nowrap}
+.stats{display:none}
+main{padding:0 max(16px,env(safe-area-inset-left,0px)) max(24px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:12px}
+.welcome{width:min(100%,600px);background:#fff;border:3px solid var(--ink);border-radius:14px;padding:8px 12px;font-weight:800;font-size:15px;display:none}
+.welcome.on{display:block}
+.dots{display:flex;gap:8px;justify-content:center}
+.dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--ink);background:#fff;display:grid;place-items:center;font:400 17px "Lilita One","Arial Black",Impact,sans-serif}
+.dot.now{background:var(--yel)}
+.dot.ok{background:var(--fact);color:#fff}
+.dot.bad{background:var(--fic);color:#fff}
+.card{width:min(100%,600px);background:var(--card);border:3px solid var(--ink);border-radius:22px;box-shadow:0 8px 0 var(--ink);padding:20px 18px 18px;position:relative}
+.label{display:inline-block;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:#fff;border-radius:6px;padding:3px 9px;border:2px solid var(--ink)}
+.l-body{background:#ff6b6b}.l-animals{background:#22b14c}.l-mind{background:#8e5cf6}.l-history{background:#f28c28}.l-science{background:#1e88e5}
+.q{font:400 clamp(26px,6.4vw,36px)/1.1 "Lilita One","Arial Black",Impact,sans-serif;margin:12px 0 4px;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ink);text-wrap:balance}
+.hint{margin:0 0 14px;font-weight:800;color:var(--muted);font-size:15px}
+.opts{display:grid;gap:10px}
+.opt{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;text-align:left;min-height:56px;border:3px solid var(--ink);border-radius:14px;background:var(--soft);color:var(--ink);font-weight:700;font-size:16px;line-height:1.35;padding:12px 14px;transition:transform .12s,box-shadow .12s;box-shadow:0 4px 0 var(--ink)}
+.opt:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 var(--ink)}
+.opt:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.opt:disabled{cursor:default}
+.opt .k{width:30px;height:30px;border-radius:50%;background:var(--yel);border:2px solid var(--ink);display:grid;place-items:center;font:400 16px "Lilita One","Arial Black",Impact,sans-serif}
+.opt.real{background:#dff6e6}
+.opt.fake{background:#fde6e6;opacity:.85}
+.opt.picked{outline:4px solid var(--ink);outline-offset:2px}
+.stamp{position:absolute;right:10px;top:50%;transform:translateY(-50%) rotate(-12deg);font:400 20px/1 "Lilita One","Arial Black",Impact,sans-serif;padding:4px 10px;border:3px solid currentColor;border-radius:8px;background:#ffffffd9;animation:stamp .3s cubic-bezier(.2,1.6,.4,1)}
+.real .stamp{color:var(--fact)}.fake .stamp{color:var(--fic)}
+@keyframes stamp{from{transform:translateY(-50%) rotate(-12deg) scale(2.2);opacity:0}to{transform:translateY(-50%) rotate(-12deg) scale(1);opacity:1}}
+.opt.real,.opt.fake{padding-right:110px}
+.answer{display:none;margin-top:16px;background:var(--yel);border:3px solid var(--ink);border-radius:16px;padding:12px 14px}
+.answer.on{display:block;animation:up .3s ease-out}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.answer h3{margin:0 0 4px;font:400 22px "Lilita One","Arial Black",Impact,sans-serif;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.answer h3 small{font:900 14px Nunito,sans-serif;white-space:nowrap}
+.answer p{margin:0 0 6px;font-size:16px;font-weight:700}
+.src{font-size:13px;font-weight:800;color:#5a4500}
+.btn{display:block;width:100%;min-height:52px;margin-top:14px;border:3px solid var(--ink);border-radius:14px;background:var(--ink);color:#fff;font:400 20px "Lilita One","Arial Black",Impact,sans-serif;box-shadow:0 4px 0 #000;letter-spacing:.02em}
+.btn.yel{background:var(--yel);color:var(--ink)}
+.btn.white{background:#fff;color:var(--ink)}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.row .btn{margin-top:10px}
+.score{text-align:center}
+.big{font:400 clamp(60px,18vw,96px)/1 "Lilita One","Arial Black",Impact,sans-serif;color:var(--yel);-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink);margin:8px 0 2px}
+.verdict{font:400 26px/1.1 "Lilita One","Arial Black",Impact,sans-serif;margin:6px 0}
+.small{font-size:14px;font-weight:700;color:var(--muted);margin:4px 0}
+.toast{min-height:20px;font-weight:900;font-size:14px;color:var(--fact);margin-top:8px}
+.nb{margin-top:18px;text-align:left}
+.nb h3{font:400 22px "Lilita One","Arial Black",Impact,sans-serif;margin:0 0 2px}
+.nbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:10px}
+.nc{aspect-ratio:4/5;border:2px solid var(--ink);border-radius:10px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;font-weight:800;font-size:12px;line-height:1.2;background:var(--soft)}
+.nc.lock{background:repeating-linear-gradient(45deg,#e7eef4 0 8px,#dbe5ee 8px 16px);color:#7a8a98;align-items:center;justify-content:center;font:400 30px "Lilita One","Arial Black",Impact,sans-serif}
+.nc .label{font-size:10px;padding:1px 5px;align-self:flex-start}
+.cta{width:min(100%,600px);display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;font-weight:800;color:var(--ink);background:#ffffffd9;border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:15px}
+.cta a{color:var(--deep);font-weight:900}
+footer{font-size:13px;font-weight:700;color:var(--ink);text-align:center}
+footer a{color:var(--ink)}
+@media(min-width:900px){
+.app{grid-template-columns:minmax(0,5fr) minmax(0,6fr);height:100%}
+.side{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:40px 44px;height:100%;background:radial-gradient(circle at 50% 70%,#ffffff55,transparent 60%)}
+h1{font-size:64px}
+.tagline{font-size:18px}
+.prof{width:min(78%,340px);align-self:center;margin:12px 0}
+.pills{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%}
+.stat{background:#fff;border:3px solid var(--ink);border-radius:14px;padding:8px 12px;box-shadow:0 4px 0 var(--ink)}
+.stat b{display:block;font:400 30px "Lilita One","Arial Black",Impact,sans-serif}
+.stat span{font-size:14px;font-weight:800;color:var(--muted)}
+main{justify-content:center;overflow-y:auto;padding:36px 32px}
+}
+@media(max-width:420px){.opt.real,.opt.fake{padding-right:14px;padding-bottom:40px}.stamp{top:auto;bottom:6px;transform:rotate(-8deg);font-size:16px}@keyframes stamp{from{transform:rotate(-8deg) scale(2);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div>
+      <span class="ribbon">FFF</span>
+      <h1>Real or Fiction?</h1>
+      <p class="tagline">Strange questions. Real answers. <span id="dayLabel"></span></p>
+      <div class="pills"><span class="pill">Streak <span id="pStreak">0</span></span><span class="pill">Cards <span id="pCards">0</span>/<span id="pTotal">0</span></span></div>
+    </div>
+    <div class="prof" aria-hidden="true">
+      <svg viewBox="0 0 200 220">
+        <defs>
+          <radialGradient id="sh" cx=".4" cy=".35"><stop offset="0" stop-color="#f6d2b0"/><stop offset="1" stop-color="#dba57e"/></radialGradient>
+          <g id="lens"><circle r="17" fill="#1b2430" stroke="#141414" stroke-width="4"/><path d="M0 0m-9 0a9 9 0 1 0 9-9a5 5 0 1 0 5 5" stroke="#9fe3ff" stroke-width="3" fill="none"/></g>
+        </defs>
+        <path d="M28 220c0-50 30-72 72-72s72 22 72 72z" fill="#fff" stroke="#141414" stroke-width="4"/>
+        <path d="M100 150l-22 70h44z" fill="#f2f2f2"/>
+        <path d="M76 150l24 40 24-40" fill="none" stroke="#141414" stroke-width="4"/>
+        <path d="M86 168l14 8 14-8v16l-14-8-14 8z" fill="#141414"/>
+        <path d="M40 200l18 4M160 200l-18 4" stroke="#141414" stroke-width="3"/>
+        <ellipse cx="100" cy="86" rx="52" ry="60" fill="url(#sh)" stroke="#141414" stroke-width="4"/>
+        <ellipse cx="48" cy="92" rx="9" ry="13" fill="#dba57e" stroke="#141414" stroke-width="4"/>
+        <ellipse cx="152" cy="92" rx="9" ry="13" fill="#dba57e" stroke="#141414" stroke-width="4"/>
+        <path d="M54 96c2 30 18 52 46 52s44-22 46-52c-8 14-20 18-30 14-6 8-26 8-32 0-10 4-22 0-30-14z" fill="#4a3426" stroke="#141414" stroke-width="4"/>
+        <path d="M84 116q16 10 32 0" stroke="#141414" stroke-width="4" fill="#fff"/>
+        <path d="M72 46q8-6 18 0" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".6"/>
+        <use href="#lens" x="78" y="84"/><use href="#lens" x="122" y="84"/>
+        <path d="M95 84h10M61 82l-12-4M139 82l12-4" stroke="#141414" stroke-width="4"/>
+        <path d="M70 62q8-6 18-2M112 60q10-4 18 2" stroke="#4a3426" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <g transform="translate(176 26)"><ellipse rx="18" ry="7" fill="none" stroke="#141414" stroke-width="3"/><ellipse rx="18" ry="7" fill="none" stroke="#141414" stroke-width="3" transform="rotate(60)"/><ellipse rx="18" ry="7" fill="none" stroke="#141414" stroke-width="3" transform="rotate(-60)"/><circle r="4.5" fill="#e8343a"/></g>
+        <g transform="translate(20 34)"><path d="M0-16a12 12 0 0 1 8 21v6h-16v-6a12 12 0 0 1 8-21z" fill="#ffd21f" stroke="#141414" stroke-width="3"/><path d="M-6 14h12" stroke="#141414" stroke-width="3"/></g>
+      </svg>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sStreak">0</b><span>day streak</span></div>
+      <div class="stat"><b id="sCards">0</b><span>cards found</span></div>
+      <div class="stat"><b id="sBest">0/5</b><span>best score</span></div>
+    </div>
+  </aside>
+  <main>
+    <div class="welcome" id="welcome"></div>
+    <div class="dots" id="dots" aria-label="Rounds"></div>
+    <section class="card" id="card" aria-live="polite"></section>
+    <div class="cta"><span>New questions every midnight.</span><a href="https://www.youtube.com/@FunFactsFictions/shorts" target="_blank" rel="noopener">Watch Fun Fact's Fictions</a></div>
+    <footer>Prototype · questions based on Fun Fact's Fictions Shorts · <a href="privacy.html">Privacy</a> · <a href="mailto:funfactsfictions@gmail.com">funfactsfictions@gmail.com</a></footer>
+  </main>
+</div>
+<script>
+{
+const SHARE_URL=(location.protocol.startsWith("http")&&!/claude\.ai|claudeusercontent/.test(location.hostname))?location.origin+location.pathname:"https://www.youtube.com/@FunFactsFictions";
+/* ---- Látogatásmérés (GoatCounter, ingyenes). Írd be a saját kódodat az idézőjelek közé, pl. "fffgames" ---- */
+const GOATCOUNTER_CODE="";
+const onPages=!/claude\.ai|claudeusercontent/.test(location.hostname)&&location.protocol.startsWith("http");
+if(GOATCOUNTER_CODE&&onPages){window.goatcounter={no_onload:false};const gs=document.createElement("script");gs.async=true;gs.dataset.goatcounter=`https://${GOATCOUNTER_CODE}.goatcounter.com/count`;gs.src="https://gc.zgo.at/count.js";document.head.appendChild(gs)}
+function track(name){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:name,title:name,event:true})}catch(e){}}
+function trackLater(name){if(!GOATCOUNTER_CODE||!onPages)return;let n=0;const t=setInterval(()=>{n++;if(window.goatcounter&&window.goatcounter.count){track(name);clearInterval(t)}else if(n>20)clearInterval(t)},500)}
+
+const CATS={body:"Your body",animals:"Animals",mind:"Psychology",history:"True story",science:"Science"};
+const BANK=[
+ {id:"eiffel",c:"history",q:"How did one man sell the Eiffel Tower twice?",real:"A con man posed as a government official, told scrap dealers the tower would be torn down, and took their money.",fake:["Paris put it up for auction twice by mistake in the 1890s, and the same buyer won both times.","A souvenir maker sold paper 'ownership shares' of the tower to tourists, and two buyers took him to court."],ans:"In 1925 Victor Lustig convinced a scrap dealer the city was scrapping the tower and sold it to him. The victim was too embarrassed to go to the police, so Lustig came back and tried it again.",tag:"True story · 1925"},
+ {id:"gum",c:"body",q:"What really happens to swallowed chewing gum?",real:"Your body can't digest the gum base, so it simply passes through in a few days.",fake:["It sticks to your stomach wall and stays there for about seven years.","Stomach acid slowly turns it into sugar, so it takes about a month to dissolve."],ans:"The seven-year story is a myth. Gum isn't digested, but it moves through and out with everything else, usually within days.",tag:"Myth or fact?"},
+ {id:"luckschool",c:"mind",q:"Can you train yourself to be lucky?",real:"In a psychologist's 'luck school', most people who practised noticing chances felt luckier within a month.",fake:["Only if you start before age 12, when your brain still sets its 'luck level'.","Yes, but only with daily rituals like lucky socks, which really change outcomes by about 10%."],ans:"Psychologist Richard Wiseman found that 'lucky' people are more relaxed and spot opportunities others miss. When unlucky volunteers practised those habits, most reported feeling luckier.",tag:"A 'luck school' tried it"},
+ {id:"bee",c:"animals",q:"Why can't a honeybee sting you twice?",real:"Its barbed stinger hooks into your skin and tears out of the bee's body when it flies away.",fake:["A bee only carries enough venom for one sting and needs a full year to refill.","The first sting releases a smell that makes the bee too dizzy to aim again."],ans:"A worker honeybee's stinger has barbs that lock into thick mammal skin. Pulling away rips it from the bee, which dies. Against other insects it can sting more than once.",tag:"It's worse for the bee"},
+ {id:"noses",c:"body",q:"Cross two fingers and rub your nose. Why does it feel like two noses?",real:"The outer sides of those fingers never touch one object at once, so your brain decides there must be two.",fake:["Crossing fingers squeezes a nerve that doubles every signal from your fingertips.","Your nose has two separate halves of skin, and crossed fingers finally feel both."],ans:"It's called Aristotle's illusion. Your brain assumes the fingers are in their normal position, so two touches on their outer edges must be two different objects.",tag:"Cross your fingers & try it"},
+ {id:"pencap",c:"science",q:"Why is there a hole in your pen cap?",real:"So air can still pass through if someone accidentally swallows or inhales the cap.",fake:["To save plastic. Millions of tiny holes add up to tonnes of plastic a year.","To stop the ink drying out by letting the pen 'breathe'."],ans:"The hole is a safety feature. If a child inhales a cap, a little air can still get through while help arrives.",tag:"It's not to save plastic"},
+ {id:"cold",c:"science",q:"Why is she always cold in the office while he's sweating?",real:"Office temperature standards were based on an average man's metabolism, which runs warmer.",fake:["Women have twice as many cold sensors in their skin as men.","Office air conditioners blow harder at desk height, where women usually sit."],ans:"A 2015 study found the formula used to set office temperatures was based on a 1960s average man. Women typically have a slower metabolism and are comfortable a few degrees warmer.",tag:"Scientists measured it"},
+ {id:"tilly",c:"history",q:"How did a 10-year-old save about 100 people from a tsunami?",real:"She remembered a geography lesson about how the sea pulls back before a tsunami, and raised the alarm.",fake:["She heard the warning on a radio she'd built for a school science fair.","Her dog refused to go to the beach, and she followed it uphill with everyone else."],ans:"In 2004 Tilly Smith was on a beach in Thailand when the sea suddenly drew back. She had just learned what that meant at school, warned her parents, and the beach was cleared in time.",tag:"True story · 2004"},
+ {id:"yawn",c:"mind",q:"Why is yawning contagious?",real:"It seems tied to social connection: you catch yawns most easily from people you're close to.",fake:["Yawning releases a gas that triggers yawns in anyone within about two metres.","Your brain copies yawns to keep the group's oxygen levels in sync."],ans:"Researchers found people catch yawns most from family, then friends, then strangers. Even dogs can catch their owners' yawns.",tag:"Try not to yawn"},
+ {id:"newspaper",c:"mind",q:"A psychologist gave 'lucky' and 'unlucky' people a newspaper. What did the lucky ones spot?",real:"A huge message on page two saying 'Stop counting: there are 43 photos in this newspaper'.",fake:["A real lottery ticket taped inside, which only one in ten people found.","A typo in the headline that changed the whole story's meaning."],ans:"The task was to count the photos. Unlucky people kept counting for minutes, while lucky people more often noticed the giant message and stopped in seconds.",tag:"A psychologist tested it"},
+ {id:"ring",c:"body",q:"Fold your middle finger down. Why can't you lift your ring finger?",real:"Ring and middle finger share tendon connections, so the ring finger can't move fully on its own.",fake:["The ring finger has no muscle of its own and is moved by the pinky.","It's an old reflex that stops you dropping things you're holding."],ans:"Tendons for the middle and ring fingers are linked by bands of tissue. With the middle finger pinned down, the ring finger is held back too.",tag:"Try it!"},
+ {id:"hangry",c:"body",q:"Why does hunger make you so angry?",real:"When blood sugar drops, your body releases stress hormones and self-control gets harder.",fake:["An empty stomach presses on a nerve linked to the brain's anger centre.","Hunger makes your ears more sensitive, so every noise feels annoying."],ans:"Low blood sugar triggers hormones like cortisol and adrenaline, the same ones behind stress. Add a tired brain and small things feel big.",tag:"Hangry is real"},
+ {id:"knuckles",c:"body",q:"Does cracking your knuckles cause arthritis?",real:"No. A doctor cracked only one hand for 60 years and neither hand got arthritis.",fake:["Yes, after about 10 years of cracking, the joint lining wears through.","Only if you crack them in cold weather, when the joint fluid is thicker."],ans:"Dr Donald Unger cracked the knuckles of his left hand, never his right, for about 60 years. Neither hand developed arthritis, and he won an Ig Nobel Prize for it.",tag:"He tested it for 60 years"},
+ {id:"crows",c:"animals",q:"How do we know crows never forget a face?",real:"Researchers in masks trapped a few crows, and crows scolded that mask for years afterwards.",fake:["Crows were trained to pick celebrities from photos and still knew them 20 years later.","Crows leave scratch marks on the cars of people they dislike."],ans:"Scientists at the University of Washington wore a caveman mask while trapping crows. For years, crows mobbed anyone in that mask, even birds that had never been caught.",tag:"They never forget"},
+ {id:"late",c:"mind",q:"Why is your friend always late?",real:"Many chronically late people honestly underestimate how long things take.",fake:["Their body clock runs about 10 minutes slower than everyone else's.","Being late is a way to look important, and most late people do it on purpose."],ans:"Psychologists call it the planning fallacy. Late people often believe a 30-minute task will take 15, and they make that mistake every time.",tag:"It's not (always) rude"},
+ {id:"lizard",c:"science",q:"What surprising thing led to today's weight-loss shots?",real:"Spit from a venomous lizard, the Gila monster.",fake:["A chemical found in the tears of sea turtles.","A mould that grew by accident on old bread in a lab."],ans:"A hormone found in Gila monster saliva led to the first drug of the GLP-1 family. Today's weight-loss shots grew out of that research.",tag:"Lizard spit!"},
+ {id:"onion",c:"science",q:"Why does cutting an onion make you cry?",real:"Cutting it releases a gas that irritates your eyes, so they make tears to wash it away.",fake:["Onions contain tiny sharp crystals that fly into your eyes when cut.","The smell triggers the same brain area as sad memories."],ans:"Broken onion cells mix chemicals that form an irritating gas. When it reaches your eyes, they flood with tears to rinse it off.",tag:"Science of tears"},
+ {id:"tickle",c:"body",q:"Why can't you tickle yourself?",real:"Your brain predicts the touch from your own movement and turns the feeling down.",fake:["Your own skin has a slightly different temperature, so it doesn't count as a touch.","Tickling only works when you can't see the hand, and you always see your own."],ans:"The cerebellum, at the back of your brain, predicts what your own movements will feel like and dampens them. A surprise touch from someone else gets through at full strength.",tag:"Brain trick"},
+ {id:"sun",c:"science",q:"Why don't we just shoot our trash into the Sun?",real:"Reaching the Sun is extremely hard: a rocket has to cancel Earth's huge orbital speed first.",fake:["The Sun's magnetic field would bounce the trash back towards Earth.","It's banned by an international treaty that protects the Sun."],ans:"Earth flies around the Sun at about 30 km per second. Falling into the Sun means cancelling almost all of that, which takes more energy than leaving the solar system. Each launch would cost a fortune and could blow up.",tag:"Rocket science"}
+];
+const store={get(){try{return JSON.parse(localStorage.getItem("fff_rof")||"{}")}catch(e){return{}}},set(v){try{localStorage.setItem("fff_rof",JSON.stringify(v))}catch(e){}}};
+const EPOCH=Date.UTC(2026,10,24),now=new Date();
+const dayNo=Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())-EPOCH)/864e5)+1;
+function rng(seed){let s=(Math.abs(seed)%2147483646)+1;return()=>(s=s*16807%2147483647)/2147483647}
+function shuf(a,seed){const r=rng(seed),b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+const ORDER=shuf(BANK,4242);
+function round(list,seed){return list.map((q,i)=>{const opts=shuf([{t:q.real,r:true},{t:q.fake[0],r:false},{t:q.fake[1],r:false}],seed*7+i);return{...q,opts}})}
+const daily=()=>round([0,1,2,3,4].map(i=>ORDER[((dayNo-1)*5+i)%ORDER.length]),dayNo);
+const extra=()=>{const s=Date.now()%100000;return round(shuf(BANK,s).slice(0,5),s)};
+let S=Object.assign({streak:0,last:0,best:0,cards:[],done:null},store.get());
+let G=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function liveStreak(){return(S.last===dayNo||S.last===dayNo-1)?S.streak:0}
+function hud(){
+ const st=liveStreak();
+ $("pStreak").textContent=st;$("sStreak").textContent=st;
+ $("pCards").textContent=S.cards.length;$("sCards").textContent=S.cards.length;$("pTotal").textContent=BANK.length;
+ $("sBest").textContent=S.best+"/5";
+ $("dayLabel").textContent=G&&G.mode==="extra"?"Bonus round":"Daily #"+dayNo;
+}
+function dots(){$("dots").innerHTML=G.qs.map((q,i)=>{const r=G.res[i];return`<span class="dot ${r===true?"ok":r===false?"bad":i===G.i?"now":""}">${i+1}</span>`}).join("")}
+function start(mode){trackLater(mode==="extra"?"rof-bonus-start":"rof-daily-start");G={mode,qs:mode==="extra"?extra():daily(),i:0,res:[]};hud();ask()}
+function ask(){
+ const q=G.qs[G.i];dots();
+ $("card").innerHTML=`<span class="label l-${q.c}">${CATS[q.c]}</span>
+ <h2 class="q">${esc(q.q)}</h2>
+ <p class="hint">One answer is real. Two are the Professor's fictions.</p>
+ <div class="opts">${q.opts.map((o,i)=>`<button class="opt" id="opt${i}" data-i="${i}"><span class="k">${"ABC"[i]}</span><span>${esc(o.t)}</span></button>`).join("")}</div>
+ <div class="answer" id="answer"></div>`;
+ $("card").querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>pick(+b.dataset.i)));
+ if(G.i>0)$("opt0").focus({preventScroll:true});
+}
+function pick(i){
+ const q=G.qs[G.i],ok=q.opts[i].r;G.res[G.i]=ok;
+ if(ok&&!S.cards.includes(q.id)){S.cards.push(q.id);store.set(S)}
+ $("card").querySelectorAll(".opt").forEach((b,k)=>{b.disabled=true;const r=q.opts[k].r;b.classList.add(r?"real":"fake");if(k===i)b.classList.add("picked");b.insertAdjacentHTML("beforeend",`<span class="stamp">${r?"FACT":"FICTION"}</span>`)});
+ const last=G.i===4,a=$("answer");
+ a.innerHTML=`<h3>${ok?"You found it!":"The Professor fooled you"}<small>${ok?"+1 card":"Card stays locked"}</small></h3>
+ <p>${esc(q.ans)}</p><div class="src">${esc(q.tag)}</div>
+ <button class="btn" id="next">${last?"See my score":"Next question"}</button>`;
+ a.classList.add("on");dots();hud();
+ $("next").addEventListener("click",()=>{if(last)finish();else{G.i++;ask()}});
+ $("next").focus({preventScroll:true});
+}
+function finish(){
+ const c=G.res.filter(Boolean).length;
+ if(G.mode==="daily"){S.streak=S.last===dayNo-1?S.streak+1:(S.last===dayNo?S.streak:1);S.last=dayNo;S.done={day:dayNo,res:G.res}}
+ S.best=Math.max(S.best,c);store.set(S);trackLater("rof-finish-"+c+"of5");hud();results(G.res,G.mode);
+}
+function results(res,mode){
+ if(!G)G={mode,qs:daily(),i:5,res};G.i=5;G.res=res;dots();
+ const c=res.filter(Boolean).length;
+ const v=["The Professor wins today","Fooled again!","Not bad, not great","You see through fictions","Almost unfoolable","You beat the Professor!"][c];
+ const owned=new Set(S.cards);
+ $("card").innerHTML=`<div class="score">
+ <span class="label l-science">${mode==="extra"?"Bonus round":"Daily #"+dayNo}</span>
+ <div class="big">${c}/5</div><div class="verdict">${v}</div>
+ <p class="small">${liveStreak()}-day streak · ${S.cards.length} of ${BANK.length} fact cards found</p>
+ <p class="small" id="countdown"></p>
+ <div class="row"><button class="btn yel" id="share">Share score</button><button class="btn white" id="more">Bonus round</button></div>
+ <div class="toast" id="toast"></div></div>
+ <div class="nb"><h3>Professor's notebook</h3><p class="small">Find the real answer to unlock its fact card.</p>
+ <div class="nbgrid">${BANK.map(q=>owned.has(q.id)?`<div class="nc"><span class="label l-${q.c}">${CATS[q.c]}</span><span>${esc(q.q)}</span></div>`:`<div class="nc lock" aria-label="Locked card">?</div>`).join("")}</div></div>`;
+ $("share").addEventListener("click",share);$("more").addEventListener("click",()=>start("extra"));tick();
+}
+async function share(){trackLater("rof-share");
+ const r=(S.done&&S.done.day===dayNo?S.done.res:G.res);
+ const text=`Real or Fiction? #${dayNo}\n${r.map(x=>x?"✅":"❌").join("")} ${r.filter(Boolean).length}/5\nCan you beat the Professor?\n${SHARE_URL}`;
+ try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==="AbortError")return}
+ try{await navigator.clipboard.writeText(text);$("toast").textContent="Copied! Paste it in the comments."}
+ catch(e){$("toast").textContent="Copy this: "+text.replace(/\n/g," ")}
+}
+function tick(){const el=$("countdown");if(!el)return;const t=new Date(),m=new Date(t.getFullYear(),t.getMonth(),t.getDate()+1),s=Math.max(0,Math.floor((m-t)/1000)),p=n=>String(n).padStart(2,"0");el.textContent=`New questions in ${p(Math.floor(s/3600))}:${p(Math.floor(s%3600/60))}:${p(s%60)}`}
+setInterval(tick,1000);
+const src={"from-yt":"YouTube","from-ig":"Instagram","from-fb":"Facebook","from-tt":"TikTok"}[location.hash.slice(1)];
+if(src){trackLater("rof-from-"+src.toLowerCase());$("welcome").textContent=`Welcome from ${src}! Find the real answer among the Professor's fictions.`;$("welcome").classList.add("on")}
+window.claude?.hot?.snapshot?.(()=>S);
+if(S.done&&S.done.day===dayNo){hud();results(S.done.res,"daily")}else start("daily");
+}
+</script>
+</body>
+</html>
