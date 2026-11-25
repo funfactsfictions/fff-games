@@ -207,7 +207,7 @@ main{justify-content:center;overflow-y:auto;padding:36px 32px}
 {
 const SHARE_URL=(location.protocol.startsWith("http")&&!/claude\.ai|claudeusercontent/.test(location.hostname))?location.origin+location.pathname:"https://www.youtube.com/@FunFactsFictions";
 /* ---- Látogatásmérés (GoatCounter, ingyenes). Írd be a saját kódodat az idézőjelek közé, pl. "fffgames" ---- */
-const GOATCOUNTER_CODE="";
+const GOATCOUNTER_CODE="funfactsfictions";
 const onPages=!/claude\.ai|claudeusercontent/.test(location.hostname)&&location.protocol.startsWith("http");
 if(GOATCOUNTER_CODE&&onPages){window.goatcounter={no_onload:false};const gs=document.createElement("script");gs.async=true;gs.dataset.goatcounter=`https://${GOATCOUNTER_CODE}.goatcounter.com/count`;gs.src="https://gc.zgo.at/count.js";document.head.appendChild(gs)}
 function track(name){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:name,title:name,event:true})}catch(e){}}
